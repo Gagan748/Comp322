@@ -20,7 +20,7 @@ struct tms t;
 if(cpid==0)    //if child is executing
 {
 printf("\nPPID:%d, PID:%d",getppid(),getpid());
-return 0;
+exit(EXIT_SUCCESS);
 }
 else if(cpid>0)    //parent is executing
 {
@@ -43,7 +43,7 @@ printf("\nCUSER:%ju, CSYSTEM:%ju\n",(uintmax_t)t.tms_cutime,(uintmax_t)t.tms_cst
 else
 {
 printf("\nchild not created, ERROR");
-return 0;
+exit(EXIT_FAILURE);
 }
 time(&stop);
 printf("\nSTOP:%ld\n",stop);   //printing stop time
