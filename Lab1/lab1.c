@@ -10,6 +10,7 @@ time_t stop;
 pid_t cpid;                // to store ID of child
 int status;                // to store status of child process 
 
+printf("\ntime-4-baby-and-me");
 time(&start);
 printf("\nSTART:%ld\n",start);
 
