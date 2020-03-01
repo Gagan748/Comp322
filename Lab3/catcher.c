@@ -12,6 +12,26 @@ char *signame[34]={"null","SIGUP","SIGINT","SIGQUIT","SIGILL","SIGTRAP","SIGABRT
 //function returning integer value corresponding to signal
 int signo(char *str)
 {
+if(strcmp(str,"UP")==0)return 1; if(strcmp(str,"INT")==0) return 2;
+if(strcmp(str,"QUIT")==0)return 3; if(strcmp(str,"ILL")==0)return 4;
+if(strcmp(str,"TRAP")==0)return 5;if(strcmp(str,"ABRT")==0)return 6;
+if(strcmp(str,"BUS")==0)return 7;if(strcmp(str,"FPE")==0)return 8;
+if(strcmp(str,"KILL")==0)return 9;if(strcmp(str,"USR1")==0)return 10;
+if(strcmp(str,"SEGV")==0)return 11;if(strcmp(str,"USR2")==0)return 12;
+if(strcmp(str,"PIPE")==0)return 13;if(strcmp(str,"ALRM")==0)return 14;
+if(strcmp(str,"TERM")==0)return 15;if(strcmp(str,"STKFLT")==0)return 16;
+if(strcmp(str,"CHLD")==0)return 17;if(strcmp(str,"CONT")==0)return 18;
+if(strcmp(str,"STOP")==0)return 19;if(strcmp(str,"TSTP")==0)return 20;
+if(strcmp(str,"TTIN")==0)return 21;if(strcmp(str,"TTOU")==0)return 22;
+if(strcmp(str,"URG")==0)return 23;if(strcmp(str,"XCPU")==0)return 24;
+if(strcmp(str,"XFSZ")==0)return 25;if(strcmp(str,"VTALRM")==0)return 26;
+if(strcmp(str,"PROF")==0)return 27;if(strcmp(str,"WINCH")==0)return 28;
+if(strcmp(str,"IO")==0)return 29;if(strcmp(str,"PWR")==0)return 30;
+if(strcmp(str,"SYS")==0)return 31;
+return -1;
+}
+int signo1(char *str)
+{
 if(strcmp(str,"SIGUP")==0)return 1; if(strcmp(str,"SIGINT")==0) return 2;
 if(strcmp(str,"SIGQUIT")==0)return 3; if(strcmp(str,"SIGILL")==0)return 4;
 if(strcmp(str,"SIGTRAP")==0)return 5;if(strcmp(str,"SIGABRT")==0)return 6;
@@ -30,6 +50,8 @@ if(strcmp(str,"SIGIO")==0)return 29;if(strcmp(str,"SIGPWR")==0)return 30;
 if(strcmp(str,"SIGSYS")==0)return 31;
 return -1;
 }
+
+static int term=0;
 static int count=0;
 void my_handler(int sig)
 {
@@ -55,7 +77,7 @@ for(i=1;i<argc;i++)
 //registering handler for all signal before reading the one in arguments
 for(j=1;j<32;j++)
 {
-sig=signo(signame[j]); //sig gives corresponding integer value to signal
+sig=signo1(signame[j]); //sig gives corresponding integer value to signal
 signal(sig,my_handler);
 }
 
