@@ -25,9 +25,10 @@ void handler(int sig)
 	termcount++;
 	for(i=0;i<n;i++)
 	  {
+             sem_close(&chops[i]);
+             sem_destroy(&chops[i]);
 	     fprintf(stderr,"\nPhilosopher  %d completed %d cycles",i,cycle[i]);
-	     sem_close(&chops[i]);
-	     sem_destroy(&chops[i]);
+
 	  }
     }
   exit(sig);
