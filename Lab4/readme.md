@@ -16,3 +16,8 @@ command make- will run executables part1, dining-p and launch-philosopher
 command make clean- will delete all the files exceppt .c files
 
 launch-philosopher.sh- script that runs ./dining-p $@
+
+To RUN:
+STEP 1- make    (to make executables)
+STEP 2- ./launch-philosophers.sh seats   //where seats is any number
+STEP 3- to clean files - make clean
