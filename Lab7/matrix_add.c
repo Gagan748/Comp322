@@ -11,17 +11,19 @@
 void matrix_add(struct aiocb *cb, int size, int scalar)
 {
 int i;
-unsigned int num;
+unsigned int value;
 char buf[5];
-for( i=0;i<cb.aio_nbytes;i+=4)
+for( i=0;i<cb->aio_nbytes;i+=4)
 {
 memset(buf,0,5);
-memcpy(buf,cb.aio_bytes+i,4);
-num=strol(buf,NULL,10);
-num=num+scalar;
-sprintf(buf,"%4d",num); /*coverting the char read from buf to long int and writing back to buffer for write operation*/
-memcpy(cb.aio_buf+i,buf,4);
+memcpy(buf,(void *)cb->aio_nbytes+i,4);
+value=strtol(buf,NULL,10);
+value=value+scalar;
+printf("%4d",value);
+sprintf(buf,"%4d",value); /*coverting the char read from buf to long int and writing back to buffer for write operation*/
+memcpy((void *)cb->aio_buf+i,buf,4);
 }
+printf("\n");
 }
 
 int main(int argc , char *argv[])
@@ -30,11 +32,10 @@ int i,j;
 int scalar;
 int b_offset;
 
-scalar=rand(); 
-printf("\nscalar is %d",rand);
+scalar=rand()%200; 
+printf("\nscalar is %d",scalar);
 clock_t start, stop;
-int in_file,out_file;
-int *buf;
+
 int size, blocks,block_size;
 if(argc<3)
 {
@@ -45,16 +46,16 @@ exit(EXIT_FAILURE);
 size=argv[1][0]-'0';
 blocks=argv[2][0]-'0';
 block_size=size/blocks;
-buf=(int*)malloc(block_size*block_size*(sizeof(int)));
+//buf=(int*)malloc(block_size*block_size*(sizeof(int)));
 
 start=clock();
 
 struct aiocb last,current,next;
 
 /*Control block for stdin reading*/
-current.offset=0;
-current.fildes=STDIN_FILENO;
 memset(&current,0,sizeof(struct aiocb));
+current.aio_offset=0;
+current.aio_fildes=STDIN_FILENO;
 current.aio_offset=0;
 current.aio_nbytes=block_size;
 current.aio_buf=malloc(block_size);
@@ -80,13 +81,17 @@ last.aio_buf=malloc(block_size);
 if(!next.aio_buf || !last.aio_buf)
 printf("\nunable to intialize buf to control block cb");
 
+next.aio_offset=current.aio_offset + current.aio_nbytes; //first nbytes read by current block already
 for(i=0;i<blocks;i++)
 {
 for(j=0;j<blocks;j++)
 {
-//memset(&next,0,sizeof(struct aiocb));
-next.aio_offset=(inptr_t)-1;
-
+//memset(&next,0,sizeof(struct aiocb));;
+if(next.aio_offset>=size)
+{
+printf("\nAll bytes read");
+return;
+}
 aio_read(&next);
 while(aio_error(&next)==EINPROGRESS);
 
@@ -99,6 +104,7 @@ while(aio_error(&last)==EINPROGRESS);
 aio_return(&last);
 
 memcpy(&current,&next,sizeof(struct aiocb));
+next.aio_offset=next.aio_offset+next.aio_nbytes;
 }
 }
  
