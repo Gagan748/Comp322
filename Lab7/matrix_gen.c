@@ -7,7 +7,7 @@ int i,j,n;
 unsigned int upper, lower;
 if(argc<2)
 {
-fprintf)stderr,"Insufficient input");
+fprintf(stderr,"Insufficient input");
 exit(EXIT_FAILURE);
 }
 upper=100;
