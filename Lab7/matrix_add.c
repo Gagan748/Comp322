@@ -7,7 +7,8 @@
 #include<malloc.h>
 #include<unistd.h>
 #include<stdlib.h>
-//typedef struct aiocb aiocb_t;
+#include<string.h>
+
 void matrix_add(struct aiocb *cb, int size, int scalar)
 {
 int i;
@@ -15,15 +16,16 @@ unsigned int value;
 char buf[5];
 for( i=0;i<cb->aio_nbytes;i+=4)
 {
-memset(buf,0,5);
-memcpy(buf,(void *)cb->aio_nbytes+i,4);
+memset(buf,NULL,5);
+memcpy(buf,(void *)cb->aio_buf+i,4);
 value=strtol(buf,NULL,10);
 value=value+scalar;
 printf("%4d",value);
+memset(buf,NULL,5);
 sprintf(buf,"%4d",value); /*coverting the char read from buf to long int and writing back to buffer for write operation*/
 memcpy((void *)cb->aio_buf+i,buf,4);
 }
-printf("\n");
+//printf("\n");
 }
 
 int main(int argc , char *argv[])
@@ -54,7 +56,7 @@ total_size=size*size;
 block_size=size/blocks;
 
 //buf=(int*)malloc(block_size*block_size*(sizeof(int)));
-printf("\n matrix size=%d, blocks=%d blocksize=%d",size,blocks,block_size);
+printf("\n matrix size=%d, blocks=%d blocksize=%d\n",size,blocks,block_size);
 start=clock();
 
 struct aiocb last,current,next;
@@ -92,26 +94,33 @@ last.aio_buf=malloc(4*block_size*block_size);
 
 if(!next.aio_buf || !last.aio_buf)
 printf("\nunable to intialize buf to control block cb");
+int flag=0;
 
-next.aio_offset=current.aio_nbytes; //first nbytes read by current block already
 //printf("\n offset of next block now is %d",(int*)next.aio_offset);
+
 for(i=0;i<blocks;i++)
 {
 for(j=0;j<blocks;j++)
 {
 //memset(&next,0,sizeof(struct aiocb));;
-if(next.aio_offset>=total_size)
+if(flag==1)
+break;
+if(next.aio_offset>=total_size*4)
 {
-//printf("\nAll bytes read");
-return;
+printf("\nAll bytes read");
+flag=1;
+break;
 }
+if(flag==1)
+break;
+
 next.aio_fildes=0; //setting to read input
 aio_read(&next);
 while(aio_error(&next)==EINPROGRESS);
 ret1=aio_return(&next);
 //if(ret1>=0)
 //printf("\nreading of next done");
-//matrix_add(&current,block_size,scalar);
+matrix_add(&current,block_size,scalar);
 
 memcpy(&last,&current,sizeof(struct aiocb));
 last.aio_fildes=1;
@@ -127,16 +136,9 @@ next.aio_offset=next.aio_offset+next.aio_nbytes;
 //printf("\n next_offset =%d ", (int*)next.aio_offset);
 }
 }
- 
-/*writing last block copied to current to STDOUT*/
-//matrix_add(&current,block_size,scalar);
-current.aio_fildes=1;
-aio_write(&current);
-while(aio_error(&current)==EINPROGRESS);
-aio_return(&current);
 
 stop=clock();
 double total_time=((double)(stop-start))/CLOCKS_PER_SEC;
-printf("\ntotal time taken=%f",total_time);
+printf("\n\ntotal time taken=%f\n",total_time);
 
 }
